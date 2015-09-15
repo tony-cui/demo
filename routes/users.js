@@ -115,25 +115,25 @@ router.get('/list/day/:day',
 					}
 					res.send(userList2);
 				} else {
+					if (start >= today) {
+						function getName(item) {
+							return item.name
+						}
+						// exist in list but not in userList
+						var diff = _.difference(_.map(list, getName), _.map(userList, getName));
+						_.each(diff, function(item) {
 
-					// if day greater than today, it should return a empty array
-					// if day is less than today, there should have some record in db
-					function getName(item) {
-						return item.name
-					}
-					// exist in list but not in userList
-					var diff = _.difference(_.map(list, getName), _.map(userList, getName));
-					_.each(diff, function(item) {
-						var newUser = new user;
-						newUser.name = item;
-						newUser.day = moment(day).hour(1).minute(1).second(1);
-						if (start >= today) {
+							var newUser = new user;
+							newUser.name = item;
+							newUser.day = moment(day).hour(1).minute(1).second(1);
+
 							newUser.save(function(err, doc, numberAffected) {
 								newUser = doc;
 							});
-						}
-						userList.push(newUser);
-					});
+
+							userList.push(newUser);
+						});
+					}
 					res.send(userList);
 				}
 			});
@@ -179,8 +179,8 @@ router.post("/updateUser", function(req, res, next) {
 			_id: input._id
 		}, function(err, doc) {
 			if (err) res.send('could not find the user');
-			if (item == null) {
-				doc.sign =  (input.score > 0) ? 'Y' : 'N';
+			if (item == null || item == undefined) {
+				doc.sign = (input.score > 0) ? 'Y' : 'N';
 			} else {
 				if (input.score >= item.score + diff) {
 					doc.sign = 'Y';
