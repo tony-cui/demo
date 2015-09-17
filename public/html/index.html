@@ -16,10 +16,10 @@
 	<body ng-controller="userController as ctrl">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-md-3">
+				<div class="col-md-2 col-sm-4 col-xs-6">
 					<calendar selected="day"></calendar>
 				</div>
-				<div class="col-md-6 well">
+				<div class="col-md-6 well ng-hide">
 					<h4>过去两天未完成任务的工会成员</h4>
 					<table class="table">
 						<thead>
@@ -37,8 +37,9 @@
 					</table>
 				</div>
 			</div>
+
 			<div class="row">
-				<div class="col-md-9">
+				<div class="col-md-9 col-xs-12 col-sm-10">
 					<h3>工会玩家列表</h3>
 					<button type="button" class="btn btn-primary" ng-click="ctrl.open()">
 						添加工会成员
@@ -46,58 +47,36 @@
 					
 
 					<!-- score part -->
-					<table class="table">
+					<table class="table table-condensed" style="table-layout: fixed;">
 						<thead>
 							<tr>
-								<th>游戏名</th>
-								<th ng-repeat="day in ctrl.duration">{{day.format('MM-DD')}}</th>
-								<th>累计未做天数</th>
-								<th>当日完成情况</th>
-								<th>操作</th>
+								<th colRatio="20">游戏名</th>
+								<th colRatio="10" ng-repeat="day in ctrl.duration">{{day.format('MM-DD')}}</th>
+								<th colRatio="20">累计未做天数</th>
+								<th colRatio="20">当日完成情况</th>
+								<th colRatio="10">操作</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr ng-repeat="(name, scoreList) in ctrl.userListInPeriod">
-								<td>{{name}}</td>
-								<td ng-repeat="item in scoreList" ng-dblclick="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
+								<td colRatio="20">{{name}}</td>
+								<td colRatio="10" ng-repeat="item in scoreList" ng-dblclick="ctrl.showEdit(item)" ng-click="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
 									<span ng-if="!item.edit">
-										{{item.score}}
+										{{item.diff}} <span>/{{item.score}}</span>
 									</span>
-									<input ng-if="item.edit" type="number" ng-model="item.score" ng-blur="ctrl.saveScore(item)" min="0" required>
+									<div class="input-group" ng-if="item.edit">
+									 <!-- <input type="text" class="form-control" ng-model="item.score" aria-describedby="basic-addon2"> -->
+									 <h-number value="item.score" step="1" aria-describedby="basic-addon2"></h-number>
+									 <span class="input-group-addon" id="basic-addon2" ng-click="ctrl.saveScore(item)">
+									 		<i class="fa fa-check"></i>
+									 </span>
+									</div>
+									<!-- <input  type="number" ng-model="item.score" ng-blur="ctrl.saveScore(item)" min="0" required> -->
 								</td>
-								<td>{{ctrl.unSignUsersTotal[name]}}</td>
-								<td ng-class="ctrl.getCss(scoreList[scoreList.length-1])">{{scoreList[scoreList.length-1].sign}}</td>
-								<td>
+								<td colRatio="20">{{ctrl.unSignUsersTotal[name]}}</td>
+								<td colRatio="20" ng-class="ctrl.getCss(scoreList[scoreList.length-1])">{{scoreList[scoreList.length-1].sign}}</td>
+								<td colRatio="10">
 									<button class="btn btn-primary" ng-click="ctrl.removeUser(name, $index)">删除</button>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-
-					<!-- sign part -->
-					<table class="table ng-hide">
-						<thead>
-							<tr>
-								<th>name </th>
-								<th>Sign</th>
-								<th>status</th>
-								<th>action</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr ng-repeat="user in ctrl.users">
-								<td>
-								{{user.name}}</td>
-								<td>
-									{{user.day | date:'yyyy-MM-dd'}}
-								</td>
-								<td>{{user.sign}}</td>
-								<td>
-									<button class="btn btn-info" ng-if="user.sign == 'N'" ng-click="ctrl.sign(user)">sign</button>
-									<button class="btn btn-info" ng-if="user.sign == 'Y'" ng-click="ctrl.unsign(user)">unsign</button>
-									<button class="btn btn-primary" ng-click="ctrl.removeUser(user, $index)">
-										Delete
-									</button>
 								</td>
 							</tr>
 						</tbody>
@@ -106,6 +85,7 @@
 			</div>
 		</div>
 	<script src="../javascripts/angular.js"></script>
+	<script src="../javascripts/angular-touch.min.js"></script>
 	<script src="../javascripts/jquery.min.js"></script>
 	<script src="../javascripts/bootstrap.min.js"></script>
 
@@ -119,5 +99,6 @@
     <script src="../javascripts/moment.min.js"></script>
    	<script src="../javascripts/angular-sanitize.min.js"></script>
    	<script src="../javascripts/angular-animate.min.js"></script>
+   	<script src="../javascripts/angular-number-picker.js"></script>
 	</body>
 </html>

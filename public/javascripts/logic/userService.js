@@ -8,7 +8,8 @@
 	 */
 	angular.module('app.service', [])
 		.factory('UserService', ['$http', '$q', '$filter', function($http, $q, $filter) {
-			var baseUrl = "http://localhost:3000/users";
+			// var baseUrl = "http://192.168.2.122:3000/users";
+			var baseUrl = "/users";
 
 			var _service = {};
 

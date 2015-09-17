@@ -12,7 +12,7 @@ var user = userSchema.user;
 
 // connect to db
 mongoose.connect('mongodb://localhost/demo');
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
 
 var db = mongoose.connection;
 
@@ -160,10 +160,13 @@ router.post('/addUser', function(req, res, next) {
 
 router.post("/updateUser", function(req, res, next) {
 	var input = req.body;
+	console.log(input);
 	var end = moment(input.day).hour(0).minute(0).second(0);
-	var start = moment(end).subtract(1, 'day');
+	var start = moment(end).clone().subtract(1, 'day');
+	var nextStart = moment(end).clone().add(1, 'day');
+	var nextEnd = moment(end).clone().add(2, 'day');
 
-	var diff = input.diff || 10;
+	var diff = 10;
 
 	// find the record pre day
 	user.findOne({
@@ -172,29 +175,54 @@ router.post("/updateUser", function(req, res, next) {
 			"$gte": start.toDate(),
 			"$lt": end.toDate()
 		}
-	}, function(err, item) {
+	}, function(err, preItem) {
+
+		console.log(preItem);
 
 		// get the record going to update
 		user.findOne({
 			_id: input._id
-		}, function(err, doc) {
+		}, function(err, todayItem) {
 			if (err) res.send('could not find the user');
-			if (item == null || item == undefined) {
-				doc.sign = (input.score > 0) ? 'Y' : 'N';
+			if (preItem == null || preItem == undefined) {
+				todayItem.sign = (input.score > 0) ? 'Y' : 'N';
+				todayItem.diff = input.score;
 			} else {
-				if (input.score >= item.score + diff) {
-					doc.sign = 'Y';
+				if (input.score >= (preItem.score + diff)) {
+					todayItem.sign = 'Y';
 				} else {
-					doc.sign = 'N';
+					todayItem.sign = 'N';
 				}
+				todayItem.diff = input.score - preItem.score;
 			}
-			doc.score = input.score;
-			doc.lastUpdateDate = new Date();
+			todayItem.score = input.score;
+			todayItem.lastUpdateDate = new Date();
 
-			doc.save(function(err) {
+			todayItem.save(function(err) {
 				if (err) {
 					res.send(false);
 				} else {
+					user.findOne({
+						name: input.name,
+						"day": {
+							"$gt": nextStart.toDate(),
+							"$lt": nextEnd.toDate()
+						}
+					}, function(err, nextItem) {
+						console.log(nextItem);
+						// if next item exists
+						if (nextItem != null && nextItem != undefined) {
+							if (nextItem.score > 0) {
+								nextItem.diff = nextItem.score - input.score;
+								nextItem.sign = (nextItem.diff >= diff) ? "Y" : "N";
+							} else {
+								nextItem.diff = 0;
+								nextItem.sign = 'N';
+							}
+							nextItem.save(function(err) {});
+						}
+					});
+
 					res.send(true)
 				}
 			});

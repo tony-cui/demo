@@ -6,9 +6,19 @@
 	 *
 	 * Description
 	 */
-	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main'])
+	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main', 'ngTouch', 'angularNumberPicker'])
 		.controller('userController', userController)
 		.controller('modalController', modalController)
+		.directive('colRatio', function() {
+			return {
+				link: function(scope, element, attr) {
+					var ratio = +(attr.ratio);
+
+					element.css('width', ratio + '%');
+
+				}
+			}
+		})
 		.config(['dialogsProvider', function(dialogsProvider) {
 			dialogsProvider.useBackdrop('static');
 			dialogsProvider.useEscClose(false);
@@ -63,7 +73,7 @@
 		// $scope.appStart = momnet();
 
 		ctrl.duration = [];
-		ctrl.showDays = 5;
+		ctrl.showDays = 3;
 
 		ctrl.userListInPeriod = [];
 
@@ -194,7 +204,7 @@
 			// 10 years
 			UserService.listUnsign(moment(), 365).then(function(data) {
 				// var unSignUsersTotal = data;
-				console.log(data);
+				// console.log(data);
 				_.map(data, function(item) {
 					ctrl.unSignUsersTotal[item._id] = item.count;
 				});
