@@ -66,10 +66,10 @@
 									</span>
 									<div class="input-group" ng-if="item.edit">
 									 <!-- <input type="text" class="form-control" ng-model="item.score" aria-describedby="basic-addon2"> -->
-									 <h-number value="item.score" step="1" aria-describedby="basic-addon2"></h-number>
-									 <span class="input-group-addon" id="basic-addon2" ng-click="ctrl.saveScore(item)">
+									 <h-number value="item.score" step="1" aria-describedby="basic-addon2" save="ctrl.saveScore(item)"></h-number>
+									 <!-- <span class="input-group-addon" id="basic-addon2" ng-click="ctrl.saveScore(item)">
 									 		<i class="fa fa-check"></i>
-									 </span>
+									 </span> -->
 									</div>
 									<!-- <input  type="number" ng-model="item.score" ng-blur="ctrl.saveScore(item)" min="0" required> -->
 								</td>

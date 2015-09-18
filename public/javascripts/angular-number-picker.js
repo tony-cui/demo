@@ -19,8 +19,10 @@
 
         var defaults = {
             min: 0,
-            max: 100,
+            max: 10000,
             step: 1,
+            step2: 10,
+            step3: 100,
             timeout: 600
         };
 
@@ -77,7 +79,8 @@
                     'min': '@',
                     'max': '@',
                     'step': '@',
-                    'change': '&'
+                    'change': '&',
+                    'save': '&'
                 },
                 // replace: true,
                 link: function($scope, element) {
@@ -103,16 +106,31 @@
 
                     var changeNumber = function($event) {
                         var type = getType($event);
-                        if ('up' === type) {
+                        var step = opts.step;
+                        switch (type) {
+                            case 'up2':
+                            case 'down2':
+                                step = opts.step2;
+                                break;
+                            case 'up3':
+                            case 'down3':
+                                step = opts.step3;
+                                break;
+                            default:
+                                step = opts.step;
+                        }
+
+                        if ('up' === type ||'up2' === type || 'up3' === type) {
+
                             if ($scope.value >= opts.max) {
                                 return;
                             }
-                            $scope.value += opts.step;
-                        } else if ('down' === type) {
+                            $scope.value += step;
+                        } else if ('down' === type || 'down2' === type || 'down3' === type) {
                             if ($scope.value <= opts.min) {
                                 return;
                             }
-                            $scope.value -= opts.step;
+                            $scope.value -= step;
                         }
                         $scope.change();
                     };
@@ -164,7 +182,7 @@
                     });
 
                 },
-                template: '<div class="input-group"><span class="input-group-addon" type="down" ng-disabled="!canDown">&nbsp;&nbsp;-&nbsp;&nbsp;</span><label class="form-control">{{ value }} {{value === 1 ? singular : plural}}</label><span class="input-group-addon" type="up" ng-disabled="!canUp">&nbsp;&nbsp;+&nbsp;&nbsp;</span></div>'
+                template: '<div class="input-group"><span class="input-group-addon" type="down3" ng-disabled="!canDown">-100</span><span class="input-group-addon" type="down2" ng-disabled="!canDown">-10</span><span class="input-group-addon" type="down" ng-disabled="!canDown">&nbsp;-&nbsp;</span><label class="form-control">{{ value }} {{value === 1 ? singular : plural}}</label><span class="input-group-addon" type="up" ng-disabled="!canUp">&nbsp;+&nbsp;</span><span class="input-group-addon" type="up2" ng-disabled="!canUp">+10</span><span class="input-group-addon" type="up3" ng-disabled="!canUp">+100</span><span class="input-group-addon" id="basic-addon2" ng-click="save()"><i class="fa fa-check"></i></span></div>'
             };
         };
 
