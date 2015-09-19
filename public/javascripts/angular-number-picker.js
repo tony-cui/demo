@@ -182,7 +182,7 @@
                     });
 
                 },
-                template: '<div class="input-group"><span class="input-group-addon" type="down3" ng-disabled="!canDown">-100</span><span class="input-group-addon" type="down2" ng-disabled="!canDown">-10</span><span class="input-group-addon" type="down" ng-disabled="!canDown">&nbsp;-&nbsp;</span><label class="form-control">{{ value }} {{value === 1 ? singular : plural}}</label><span class="input-group-addon" type="up" ng-disabled="!canUp">&nbsp;+&nbsp;</span><span class="input-group-addon" type="up2" ng-disabled="!canUp">+10</span><span class="input-group-addon" type="up3" ng-disabled="!canUp">+100</span><span class="input-group-addon" id="basic-addon2" ng-click="save()"><i class="fa fa-check"></i></span></div>'
+                template: '<div class="input-group input-group-sm"><span class="input-group-addon" type="down3" ng-disabled="!canDown">-100</span><span class="input-group-addon" type="down2" ng-disabled="!canDown">-10</span><span class="input-group-addon" type="down" ng-disabled="!canDown">&nbsp;-&nbsp;</span><label class="form-control">{{ value }} {{value === 1 ? singular : plural}}</label><span class="input-group-addon" type="up" ng-disabled="!canUp">&nbsp;+&nbsp;</span><span class="input-group-addon" type="up2" ng-disabled="!canUp">+10</span><span class="input-group-addon" type="up3" ng-disabled="!canUp">+100</span><span class="input-group-addon" id="basic-addon2" ng-click="save()"><i class="fa fa-check"></i></span></div>'
             };
         };
 

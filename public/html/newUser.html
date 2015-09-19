@@ -1,12 +1,12 @@
 <div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	<button type="button" ng-click="cancel()" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 	<h4 class="modal-title" id="myModalLabel">添加工会成员</h4>
 </div>
 <form name="myForm">
 <div class="modal-body">
 	<div class="form-group" ng-class="{ 'has-error': myForm.userName.$dirty && myForm.userName.$error.required}">
-		<label for="name">游戏名:</label>
-		<input type="text" class="form-control" name="userName" ng-model="name" placeholder="请输入游戏名" required ng-trim="true" autofocus="autofocus">
+		<label for="userName">游戏名:</label>
+		<input type="text" class="form-control" id="userName" name="userName" ng-model="name" placeholder="请输入游戏名" required ng-trim="true">
 	</div>
 </div>
 <div class="modal-footer">

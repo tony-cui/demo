@@ -6,17 +6,35 @@
 	 *
 	 * Description
 	 */
-	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main', 'ngTouch', 'angularNumberPicker'])
+	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main', 'ngTouch', 'angularNumberPicker', 'smart-table'])
 		.controller('userController', userController)
 		.controller('modalController', modalController)
-		.directive('colRatio', function() {
+		.directive('ratio', function() {
 			return {
 				link: function(scope, element, attr) {
 					var ratio = +(attr.ratio);
-
 					element.css('width', ratio + '%');
-
 				}
+			}
+		})
+		.filter('myFilter', ['$filter', function($filter) {
+			return function(rowList, predicate) {
+
+				if (predicate == null || predicate == undefined || predicate == '') {
+					return rowList;
+				} else {
+					return $filter('filter')(rowList, function(row, index) {
+						return row.list[row.list.length - 1].sign == predicate;
+					});
+				}
+			}
+		}])
+		.filter('formatNumber', function(){
+			return function(input) {
+				if(input == null || input == undefined || input == '') {
+					return 0;
+				} 
+				return input;
 			}
 		})
 		.config(['dialogsProvider', function(dialogsProvider) {
@@ -60,9 +78,9 @@
 		}
 	}
 
-	userController.$injector = ['UserService', '$scope', '$modal', 'dialogs'];
+	userController.$injector = ['UserService', '$scope', '$modal', 'dialogs', '$filter'];
 
-	function userController(UserService, $scope, $modal, dialogs) {
+	function userController(UserService, $scope, $modal, dialogs, $filter) {
 		var ctrl = this;
 
 		// moment.locale('zh_cn');
@@ -76,6 +94,7 @@
 		ctrl.showDays = 3;
 
 		ctrl.userListInPeriod = [];
+		ctrl.userListInPeriodSafe = [];
 
 		ctrl.unSignUsersTotal = {};
 		ctrl.removeUser = removeUser;
@@ -92,12 +111,25 @@
 
 		ctrl.open = open;
 
+		ctrl.addUser = addUser;
+
+		ctrl.sort = {
+			"undoDays": function(row) {
+				return ctrl.unSignUsersTotal[row.name];
+			},
+			"activity": {}
+		};
+
 		init();
+
+		$scope.$on('refreshPage', listUserInPeriod);
 
 		function init() {
 
 			// init duration
 			updateDuration($scope.day);
+
+			updateSortFunction();
 
 			listUserInPeriod();
 
@@ -106,7 +138,10 @@
 					// refresh page
 					updateDuration(newValue);
 
-					listUserInPeriod();
+					updateSortFunction();
+
+					// listUserInPeriod();
+					$scope.$broadcast('refreshPage');
 				}
 			});
 		}
@@ -118,6 +153,7 @@
 		}
 
 		function getCss(item) {
+			// console.log(item);
 			if (item.sign == 'Y') {
 				return 'success';
 			} else {
@@ -136,7 +172,8 @@
 				if (addResult) {
 					// show message
 					dialogs.notify(undefined, 'add user successfully');
-					listUserInPeriod();
+					// listUserInPeriod();
+					$scope.$broadcast('refreshPage');
 				} else {
 					dialogs.error(undefined, 'add user failed');
 				}
@@ -161,11 +198,37 @@
 			}
 		}
 
+		function updateSortFunction() {
+			_.each(ctrl.duration, function(day, index) {
+				ctrl.sort.activity[day] = function(row) {
+					return row.list[index].score;
+				}
+			})
+		}
+
 
 		function listUserInPeriod() {
 			var len = ctrl.duration.length;
 			UserService.listUserInPeriod(ctrl.duration[0], ctrl.duration[len - 1]).then(function(list) {
-				ctrl.userListInPeriod = list;
+
+				var names = _.keys(list);
+
+				var items = [];
+
+				_.each(names, function(name) {
+					var item = {
+						"name": name,
+						"list": list[name]
+					};
+
+					items.push(item);
+
+				});
+
+
+
+				ctrl.userListInPeriod = items;
+				ctrl.userListInPeriodSafe = items;
 
 				// get undone days for each user
 				getUserUnsignDays();
@@ -175,7 +238,7 @@
 
 
 		function removeUser(name, idx) {
-			var dlg = dialogs.confirm(undefined, "are you confirm to delete?");
+			var dlg = dialogs.confirm(undefined, "It will delete all data associated with this memeber, Are you confirm to delete ?");
 
 			dlg.result.then(function(btn) {
 				var user = {
@@ -202,7 +265,7 @@
 
 		function getUserUnsignDays() {
 			// 10 years
-			UserService.listUnsign(moment(), 365).then(function(data) {
+			UserService.listUnsign(moment().subtract(1, 'day'), 365).then(function(data) {
 				// var unSignUsersTotal = data;
 				// console.log(data);
 				_.map(data, function(item) {
@@ -234,6 +297,32 @@
 			}).catch(function(err) {
 				user.sign = 'Y';
 			});
+		}
+
+		function addUser(user) {
+			if (angular.isDefined($scope.name) && $scope.name != null && $scope.name.length > 0) {
+				var user = {
+					name: $scope.name,
+					day: new Date(),
+					sign: 'N',
+					score: 0,
+					diff: 0
+				};
+
+				UserService.addUser(user).then(function(data) {
+					ctrl.addNew = false;
+					$scope.name = '';
+					if (data) {
+						dialogs.notify(undefined, "user add successfully");
+						$scope.$broadcast('refreshPage');
+					} else {
+						dialogs.error(undefined, "add user failed");
+					}
+				});
+			} else {
+				dialogs.error(undefined, "please input the name");
+			}
+
 		}
 	}
 })();

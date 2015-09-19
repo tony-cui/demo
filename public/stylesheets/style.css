@@ -1,8 +1,7 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.st-sort-ascent:before{
+	content: '\25B2';
 }
 
-a {
-  color: #00B7FF;
+.st-sort-descent:before{
+ 	content: '\25BC';
 }
