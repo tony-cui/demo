@@ -218,14 +218,14 @@
 				_.each(names, function(name) {
 					var item = {
 						"name": name,
-						"list": list[name]
+						"list": $filter('orderBy')(list[name], 'day')
 					};
 
 					items.push(item);
 
 				});
 
-
+				// console.log(items);
 
 				ctrl.userListInPeriod = items;
 				ctrl.userListInPeriodSafe = items;

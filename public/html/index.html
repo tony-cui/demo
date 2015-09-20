@@ -67,7 +67,7 @@
 							<tr>
 								<th ratio="2"></th>
 								<th st-sort="name" ratio="18">游戏名</th>
-								<th st-sort="ctrl.sort.activity[day]" st-sort-default="$last ? 'reverse': ''" ratio="{{45/ctrl.showDays}}" ng-repeat="day in ctrl.duration"><span ng-bind="day.format('MM-DD')"></span></th>
+								<th st-sort="ctrl.sort.activity[day]" st-sort-default="$last ? 'reverse': ''" ratio="{{45/ctrl.showDays}}" ng-repeat="day in ctrl.duration | orderBy: '_d'"><span ng-bind="day.format('MM-DD')"></span></th>
 								<th st-sort="ctrl.sort.undoDays" ratio="15">累计未做天数</th>
 								<th ratio="15">
 									<div class="btn-group">
@@ -89,7 +89,7 @@
 							<tr ng-repeat="row in ctrl.userListInPeriod | myFilter: done">
 								<td ratio="2"><span ng-bind="$index+1"></span></td>
 								<td ratio="18"><span ng-bind="row.name"></span></td>
-								<td ratio="{{45/ctrl.showDays}}" ng-repeat="item in row.list" ng-dblclick="ctrl.showEdit(item)" ng-click="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
+								<td ratio="{{45/ctrl.showDays}}" ng-repeat="item in row.list | orderBy: 'day' " ng-dblclick="ctrl.showEdit(item)" ng-click="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
 									<span ng-if="!item.edit">
 										<span ng-bind="item.diff"></span>/<span ng-bind="item.score"></span>
 									</span>
