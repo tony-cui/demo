@@ -44,12 +44,7 @@ router.get('/list/sign/:sign/start/:start/end/:end', function(req, res) {
 	var end = moment(req.params.end);
 	var sign = req.params.sign || 'N';
 
-	console.log(start.format('YYYY-MM-DD') + "/" + end.format('YYYY-MM-DD') + "/" + sign);
-
 	user.aggregate()
-		// .match({
-		// 	"sign": sign
-		// })
 		.match({
 			"day": {
 				"$gt": start.toDate(),
@@ -73,6 +68,38 @@ router.get('/list/sign/:sign/start/:start/end/:end', function(req, res) {
 		.project({
 			_id: 1,
 			count: 1
+		})
+		.exec(function(err, list) {
+			res.send(list);
+		});
+});
+
+
+router.get("/count/start/:start/end/:end", function(req, res) {
+	var _start = req.params.start;
+	var _end = req.params.end;
+
+	var start = moment(_start);
+	var end = moment(_end).add(1, 'day');
+	removeTime(start);
+	removeTime(end);
+
+	user.aggregate()
+		.match({
+			"day": {
+				"$gt": start.toDate(),
+				"$lt": end.toDate()
+			}
+		})
+		.group({
+			_id: "$name",
+			total: {
+				$sum: "$diff"
+			}
+		})
+		.project({
+			_id: 1,
+			total: 1
 		})
 		.exec(function(err, list) {
 			res.send(list);
@@ -243,24 +270,6 @@ router.post("/deleteUser", function(req, res, next) {
 			res.send(true);
 		}
 	});
-});
-
-
-router.get('/init', function(req, res) {
-
-	for (var i = 0; i < 5; i++) {
-		var _user = new user({
-			name: 'Jack' + i,
-			day: moment('9999-12-31')
-		});
-
-		//_user.sayHi();
-		_user.save(function(err) {
-			console.log(err);
-		});
-	};
-
-	res.send('data inited');
 });
 
 module.exports = router;

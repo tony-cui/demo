@@ -11,6 +11,8 @@
 			// var baseUrl = "http://192.168.2.122:3000/users";
 			var baseUrl = "/users";
 
+			var appInitDay = moment("2015-09-19");
+
 			var _service = {};
 
 			_service.addUser = addUser;
@@ -19,6 +21,7 @@
 			_service.deleteUser = deleteUser;
 			_service.listUnsign = listUnsign;
 			_service.listUserInPeriod = listUserInPeriod;
+			_service.countUserActivity = countUserActivity;
 
 			return _service;
 
@@ -45,7 +48,7 @@
 				UnsignDays = UnsignDays || 2;
 
 				var end = day.add(1, 'day').format('YYYY-MM-DD');
-				var start = day.clone().subtract(UnsignDays, 'day').format('YYYY-MM-DD');;
+				var start = day.clone().subtract(UnsignDays, 'day').format('YYYY-MM-DD');
 
 				return $http.get(baseUrl + "/list/sign/N/start/" + start + "/end/" + end).then(function(data) {
 					return data.data;
@@ -134,12 +137,27 @@
 
 			function deleteUser(user) {
 				return $http.post(baseUrl + "/deleteUser", user).then(function(data) {
-					return data.data
+					return data.data;
 				}).catch(function(err) {
 					return $q.reject(err);
 				});
 			}
 
+			function countUserActivity(weekOffset) {
+				var end = moment();
+				var start = end.clone().subtract(weekOffset, 'week');
+				if(start < appInitDay) {
+					start = appInitDay;
+				}
+
+				var _end = end.format("YYYY-MM-DD");
+				var _start = start.format("YYYY-MM-DD");
+				return $http.get(baseUrl + "/count/start/" + _start + "/end/" + _end).then(function(data) {
+					return data.data;
+				}).catch(function(err) {
+					return $q.reject(err);
+				});
+			}
 		}]);
 
 })();

@@ -17,6 +17,24 @@
 				}
 			}
 		})
+		.filter('weekFilter', function() {
+			return function(input) {
+				switch (input) {
+					case 1:
+						return "一";
+						break;
+					case 2:
+						return "两";
+						break;
+					case 3:
+						return "三";
+						break;
+					case 4:
+						return "四";
+						break;
+				}
+			}
+		})
 		.filter('myFilter', ['$filter', function($filter) {
 			return function(rowList, predicate) {
 
@@ -29,11 +47,11 @@
 				}
 			}
 		}])
-		.filter('formatNumber', function(){
+		.filter('formatNumber', function() {
 			return function(input) {
-				if(input == null || input == undefined || input == '') {
+				if (input == null || input == undefined || input == '') {
 					return 0;
-				} 
+				}
 				return input;
 			}
 		})
@@ -88,6 +106,10 @@
 		$scope.edit = false;
 		$scope.score = 0;
 
+		$scope.week = 1;
+
+		ctrl.currentEdit = {};
+
 		// $scope.appStart = momnet();
 
 		ctrl.duration = [];
@@ -97,6 +119,7 @@
 		ctrl.userListInPeriodSafe = [];
 
 		ctrl.unSignUsersTotal = {};
+		ctrl.totalActivity = {};
 		ctrl.removeUser = removeUser;
 
 		ctrl.listUserInPeriod = listUserInPeriod;
@@ -117,7 +140,10 @@
 			"undoDays": function(row) {
 				return ctrl.unSignUsersTotal[row.name];
 			},
-			"activity": {}
+			"activity": {},
+			"totalActivity": function(row){
+				return ctrl.totalActivity[row.name];
+			}
 		};
 
 		init();
@@ -133,6 +159,8 @@
 
 			listUserInPeriod();
 
+			getUserTotalActivity();
+
 			$scope.$watch("day", function(newValue, oldValue) {
 				if (newValue != oldValue) {
 					// refresh page
@@ -144,11 +172,17 @@
 					$scope.$broadcast('refreshPage');
 				}
 			});
+
+			$scope.$watch("week", function(newValue) {
+				getUserTotalActivity(newValue);
+			});
 		}
 
 		function showEdit(item) {
 			if (item._id) {
+				ctrl.currentEdit.edit = false;
 				item.edit = true;
+				ctrl.currentEdit = item;
 			}
 		}
 
@@ -185,7 +219,8 @@
 			UserService.updateUser(user).then(function(data) {
 				user.edit = false;
 				// update page
-				listUserInPeriod();
+				// listUserInPeriod();
+				$scope.$broadcast('refreshPage');
 			});
 		}
 
@@ -232,6 +267,7 @@
 
 				// get undone days for each user
 				getUserUnsignDays();
+
 			});
 		}
 
@@ -265,11 +301,21 @@
 
 		function getUserUnsignDays() {
 			// 10 years
-			UserService.listUnsign(moment().subtract(1, 'day'), 365).then(function(data) {
+			var endDay = $scope.day.clone().subtract(1, 'day');
+			UserService.listUnsign(endDay, 365).then(function(data) {
 				// var unSignUsersTotal = data;
 				// console.log(data);
 				_.map(data, function(item) {
 					ctrl.unSignUsersTotal[item._id] = item.count;
+				});
+			});
+		}
+
+		function getUserTotalActivity(week) {
+			var week = week || 1;
+			UserService.countUserActivity(week).then(function(data) {
+				_.map(data, function(item) {
+					ctrl.totalActivity[item._id] = item.total;
 				});
 			});
 		}
