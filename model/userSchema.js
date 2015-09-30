@@ -9,7 +9,8 @@ var schema = new Schema({
 	sign: {type: String, default: 'N'},
 	score: {type: Number, default: 0},
 	diff: {type:Number,default: 0},
-	lastUpdateDate: {type: Date, default: new Date()}
+	lastUpdateDate: {type: Date, default: new Date()},
+	createDate: {type: String}
 });
 
 

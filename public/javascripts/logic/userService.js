@@ -107,7 +107,7 @@
 								if (record == null || record.length == 0) {
 									var user = {
 										"name": key,
-										"day": moment(day),
+										"day": moment(day).format("YYYY-MM-DD"),
 										"score": "-",
 										"sign": 'N',
 										"exist": false

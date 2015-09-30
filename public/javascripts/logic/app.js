@@ -6,7 +6,7 @@
 	 *
 	 * Description
 	 */
-	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main', 'ngTouch', 'angularNumberPicker', 'smart-table'])
+	angular.module('app', ['app.service', 'app.directive', 'ui.bootstrap', 'dialogs.main', 'ngTouch', 'angularNumberPicker', 'smart-table', 'ui.router'])
 		.controller('userController', userController)
 		.controller('modalController', modalController)
 		.directive('ratio', function() {
@@ -60,7 +60,23 @@
 			dialogsProvider.useEscClose(false);
 			dialogsProvider.useCopy(false);
 			dialogsProvider.setSize('sm');
-		}]);
+		}])
+		.run(appStart);
+
+	appStart.$injector = ['$rootScope'];
+
+	function appStart($rootScope) {
+		$rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
+			console.log("toState: " + toState.name + " fromState: " + fromState.name);
+		});
+
+		$rootScope.$on('$stateNotFound',
+			function(event, unfoundState, fromState, fromParams) {
+				console.log(unfoundState.to); // "lazy.state"
+				console.log(unfoundState.toParams); // {a:1, b:2}
+				console.log(unfoundState.options); // {inherit:false} + default options
+			})
+	}
 
 	modalController.$injector = ['$scope', '$modalInstance', 'UserService', 'dialogs'];
 
@@ -141,7 +157,7 @@
 				return ctrl.unSignUsersTotal[row.name];
 			},
 			"activity": {},
-			"totalActivity": function(row){
+			"totalActivity": function(row) {
 				return ctrl.totalActivity[row.name];
 			}
 		};

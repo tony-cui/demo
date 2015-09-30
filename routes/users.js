@@ -79,7 +79,7 @@ router.get("/count/start/:start/end/:end", function(req, res) {
 	var _start = req.params.start;
 	var _end = req.params.end;
 
-	var start = moment(_start);
+	var start = moment(_start).add(1, 'day');
 	var end = moment(_end).add(1, 'day');
 	removeTime(start);
 	removeTime(end);
@@ -129,38 +129,53 @@ router.get('/list/day/:day',
 
 					var userList2 = [];
 					// auto init record for future
-					if (start >= today) {
-						_.each(list, function(item) {
-							var newUser = new user;
-							newUser.name = item.name;
-							newUser.day = moment(day).hour(1).minute(1).second(1);
+					// if (start >= today) {
+					_.each(list, function(item) {
+						var newUser = new user;
+						newUser.name = item.name;
+						newUser.day = moment(day).hour(1).minute(1).second(1);
+
+						item.createDate = item.createDate || today.format("YYYY-MM-DD");
+
+						if (moment(day).format("YYYY-MM-DD") >= item.createDate) {
 							newUser.save(function(err, doc, numberAffected) {
 								newUser = doc;
 							});
 							userList2.push(newUser);
-						});
-					}
+						}
+
+					});
+					// }
 					res.send(userList2);
 				} else {
-					if (start >= today) {
-						function getName(item) {
-							return item.name
-						}
-						// exist in list but not in userList
-						var diff = _.difference(_.map(list, getName), _.map(userList, getName));
-						_.each(diff, function(item) {
+					// if (start >= today) {
+					function getName(item) {
+						return item.name
+					}
+					// exist in list but not in userList
+					var diff = _.difference(_.map(list, getName), _.map(userList, getName));
+					_.each(diff, function(item) {
 
-							var newUser = new user;
-							newUser.name = item;
-							newUser.day = moment(day).hour(1).minute(1).second(1);
+						var newUser = new user;
+						newUser.name = item;
+						newUser.day = moment(day).hour(1).minute(1).second(1);
 
+						var dummyUser = _.find(list, function(input) {
+							return input.name == item;
+						})
+
+						dummyUser.createDate = dummyUser.createDate || today.format("YYYY-MM-DD");
+
+						if (moment(day).format("YYYY-MM-DD") >= dummyUser.createDate) {
 							newUser.save(function(err, doc, numberAffected) {
 								newUser = doc;
 							});
 
 							userList.push(newUser);
-						});
-					}
+						}
+
+					});
+					// }
 					res.send(userList);
 				}
 			});
@@ -174,6 +189,7 @@ router.post('/addUser', function(req, res, next) {
 	var newUser = new user;
 	newUser.name = input.name;
 	newUser.day = moment('9999-12-31');
+	newUser.createDate = moment().format("YYYY-MM-DD");
 
 	newUser.save(function(err, m) {
 		if (err) {
@@ -269,6 +285,24 @@ router.post("/deleteUser", function(req, res, next) {
 		} else {
 			res.send(true);
 		}
+	});
+});
+
+
+router.get("/updateCreateDay/name/:name/day/:day", function(req, res) {
+	var name = req.params.name;
+	var day = req.params.day;
+
+	user.findOne({
+		name: name,
+		day: moment("9999-12-31")
+	}, function(err, metaItem) {
+
+		metaItem.createDate = moment(day).format("YYYY-MM-DD");
+
+		metaItem.save(function(err) {
+			res.send(err);
+		});
 	});
 });
 

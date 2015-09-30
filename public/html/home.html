@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html ng-app="app">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	    <meta charset="utf-8">
+	    <title>工会活跃统计表</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+	    <meta name="description" content="">
+
+	    <link rel="stylesheet" href="../stylesheets/bootstrap.min.css">
+	    <link rel="stylesheet" href="../stylesheets/dialogs.css">
+	    <link rel="stylesheet" href="../stylesheets/calendar.css">
+	    <link rel="stylesheet" href="../stylesheets/font-awesome.min.css">
+	    <link rel="stylesheet" href="../stylesheets/style.css">
+	    <!-- <link href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet"> -->
+	</head>
+	<body ng-controller="userController as ctrl">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-4 col-sm-12 col-xs-12">
+					<calendar selected="day"></calendar>
+				</div>
+			</div>
+			<div class="row" ng-show="ctrl.addNew">
+				<div class="col-md-3 col-xs-12">
+					<form name="myForm">
+						<div class="form-group" ng-class="{ 'has-error': myForm.userName.$dirty && myForm.userName.$error.required}">
+							<label for="userName">游戏名:</label>
+							<input type="text" class="form-control" id="userName" name="userName" ng-model="name" placeholder="请输入游戏名" required ng-trim="true">
+						</div>
+						<button type="button" class="btn btn-primary" ng-click="ctrl.addUser()">添加</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 col-xs-12 col-sm-12">
+					<h3>工会玩家列表</h3>
+					<!-- <button ng-if="false" type="button" class="btn btn-primary" ng-click="ctrl.open()">
+						添加工会成员
+					</button> -->
+					<button type="button" class="btn btn-primary" ng-click="ctrl.addNew = !ctrl.addNew">
+						<span ng-if="!ctrl.addNew">添加工会成员</span>
+						<span ng-if="ctrl.addNew">取消添加</span>
+					</button>
+
+					<!-- score part -->
+					<table st-table="ctrl.userListInPeriod" st-safe-src="ctrl.userListInPeriodSafe" class="table table-condensed" style="table-layout: fixed;">
+						<thead>
+							<tr>
+								<th ratio="2"></th>
+								<th st-sort="name" ratio="18">游戏名</th>
+								<th st-sort="ctrl.sort.activity[day]" st-sort-default="$last ? 'reverse': ''" ratio="{{30/ctrl.showDays}}" ng-repeat="day in ctrl.duration | orderBy: '_d'"><span ng-bind="day.format('MM-DD')"></span></th>
+								<th st-sort="ctrl.sort.undoDays" ratio="15">累计未做天数</th>
+								<th ratio="15">
+									<div class="btn-group">
+									  <button type="button" class="btn btn-default dropdown-toggle" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"><b><span ng-bind="done=='N' ? '未完成': (done =='Y' ? '已完成': '当日完成情况')"></span></b>
+									    &nbsp;<span class="caret"></span>&nbsp;
+									    <span class="sr-only">Toggle Dropdown</span>
+									  </button>
+									  <ul class="dropdown-menu">
+									    <li><a href="" ng-click="done = 'Y'">完成</a></li>
+									    <li><a href="" ng-click="done = 'N'">未完成</a></li>
+									    <li><a href="" ng-click="done = ''">全部</a></li>
+									  </ul>
+									</div>
+								</th>
+								<th st-sort="ctrl.sort.totalActivity" ratio="15">
+									<div class="btn-group">
+									  <button type="button" class="btn btn-default"><b><span>{{week | weekFilter}}周累计活跃度统计</span></b></button>
+									  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									  	<span class="caret"></span>
+									    <span class="sr-only">Toggle Dropdown</span>
+									  </button>
+									  <ul class="dropdown-menu">
+									    <li><a href="" ng-click="week = 1">一周</a></li>
+									    <li><a href="" ng-click="week = 2">二周</a></li>
+									    <li><a href="" ng-click="week = 3">三周</a></li>
+									    <li><a href="" ng-click="week = 4">四周</a></li>
+									  </ul>
+									</div>
+								</th>
+								<th ratio="7">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="row in ctrl.userListInPeriod | myFilter: done">
+								<td ratio="2"><span ng-bind="$index+1"></span></td>
+								<td ratio="18"><span ng-bind="row.name"></span></td>
+								<td ratio="{{45/ctrl.showDays}}" ng-repeat="item in row.list | orderBy: 'day' " ng-dblclick="ctrl.showEdit(item)" ng-click="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
+									<span ng-if="!item.edit">
+										<span ng-bind="item.diff"></span>/<span ng-bind="item.score"></span>
+									</span>
+									<div class="input-group" ng-if="item.edit">
+									 <h-number value="item.score" step="1" aria-describedby="basic-addon2" save="ctrl.saveScore(item)"></h-number>
+									</div>
+								</td>
+								<td ratio="15"><span ng-bind="ctrl.unSignUsersTotal[row.name] | formatNumber"></span></td>
+								<td ratio="15" ng-class="ctrl.getCss(row.list[row.list.length-1])">
+								<span ng-bind="row.list[row.list.length-1].sign"></span></td>
+								<td ratio="15"><span ng-bind="ctrl.totalActivity[row.name]"></span></td>
+								<td ratio="7">
+									<button class="btn btn-primary" ng-click="ctrl.removeUser(row.name, $index)">删除</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	<script src="../javascripts/angular.js"></script>
+	<script src="../javascripts/angular-touch.min.js"></script>
+	<script src="../javascripts/jquery.min.js"></script>
+	<script src="../javascripts/bootstrap.min.js"></script>
+
+    <script src="../javascripts/logic/app.js"></script>
+    <script src="../javascripts/logic/userService.js"></script>
+    <script src="../javascripts/logic/directive/calendar.js"></script>
+    <script src="../javascripts/ui-bootstrap-tpls.min.js"></script>
+    <script src="../javascripts/dialogs.min.js"></script>
+    <script src="../javascripts/less.min.js"></script>
+	<script src="../javascripts/underscore.js"></script>
+    <script src="../javascripts/moment.min.js"></script>
+   	<script src="../javascripts/angular-sanitize.min.js"></script>
+   	<script src="../javascripts/angular-animate.min.js"></script>
+   	<script src="../javascripts/angular-number-picker.js"></script>
+	<script src="../javascripts/smart-table.min.js"></script>
+	<script src="../javascripts/angular-ui-router.js"></script>
+	</body>
+</html>
