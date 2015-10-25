@@ -8,7 +8,6 @@
 	 */
 	angular.module('app.service', [])
 		.factory('UserService', ['$http', '$q', '$filter', function($http, $q, $filter) {
-			// var baseUrl = "http://192.168.2.122:3000/users";
 			var baseUrl = "/users";
 
 			var appInitDay = moment("2015-09-19");
@@ -87,15 +86,10 @@
 				$q.all(promiseList).then(function() {
 					var tmp2 = _.groupBy(tmp, 'name');
 
-					// console.log(angular.toJson(tmp2, true));
-
 					// fulfill
 					tmp2 = _.mapObject(tmp2, function(records, key, context) {
 
 						var _records = [];
-
-						// console.log(angular.toJson(records, true));
-						// console.log(angular.toJson(dayList, true));
 
 						if (records.length < dayList.length) {
 							_.each(dayList, function(day) {
@@ -143,8 +137,12 @@
 				});
 			}
 
-			function countUserActivity(weekOffset) {
-				var end = moment();
+			function countUserActivity(weekOffset, currentWeek) {
+				// default value of currentWeek is true
+				var end = moment().isoWeekday(7); // sunday
+				if(!currentWeek) {
+					end = moment();
+				}
 				var start = end.clone().subtract(weekOffset, 'week');
 				if(start < appInitDay) {
 					start = appInitDay;

@@ -11,7 +11,7 @@ var userSchema = require('../model/userSchema');
 var user = userSchema.user;
 
 // connect to db
-mongoose.connect('mongodb://localhost/demo');
+// mongoose.connect('mongodb://localhost/demo');
 // mongoose.set('debug', true);
 
 var db = mongoose.connection;

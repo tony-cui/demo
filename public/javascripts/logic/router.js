@@ -9,19 +9,22 @@
 	angular.module('app')
 		.config(routerConfig);
 
-	routerConfig.$injector = ['$stateProvider', '$urlRouterProvider'];
+	routerConfig.$injector = ['$stateProvider', '$urlRouterProvider', '$locationProvider'];
 
-	function routerConfig($stateProvider, $urlRouterProvider) {
+	function routerConfig($stateProvider, $urlRouterProvider, $locationProvider) {
+
+		// $locationProvider.html5Mode(true);
+		$locationProvider.hashPrefix('!');
 
 		$stateProvider.state('login', {
 				url: '/login',
-				templateUrl: 'login.html',
+				templateUrl: 'html/login.html',
 				controller: 'LoginController',
 				controllerAs: 'loginCtrl'
 			})
 			.state('home', {
 				url: '/home',
-				templateUrl: 'home.html',
+				templateUrl: 'html/home.html',
 				controller: 'userController',
 				controllerAs: 'ctrl'
 			});

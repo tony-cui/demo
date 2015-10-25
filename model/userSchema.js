@@ -14,12 +14,4 @@ var schema = new Schema({
 });
 
 
-// schema.post('find', function(result){
-
-// 	if(result.length == 0) {
-		
-// 	}
-
-// });
-
 exports.user = mongoose.model('user', schema);

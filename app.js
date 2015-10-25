@@ -5,11 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-// var passport = require('passport');
-// var LocalStrategy = require('passport-local').Strategy;
-
-// var auth = require('express-authentication'),
-//     basic = require('express-authentication-basic');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -28,33 +26,30 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(require('express-session')({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(require('express-session')({
-//     secret: 'keyboard cat',
-//     resave: false,
-//     saveUninitialized: false
-// }));
-// app.use(passport.initialize());
-// app.use(passport.session());
+var Account = require('./model/account');
+passport.use(new LocalStrategy(Account.authenticate()));
+passport.serializeUser(Account.serializeUser());
+passport.deserializeUser(Account.deserializeUser());
 
-// var login = basic(function(challenge, callback) {
-//   console.log(challenge);
-//   console.log(callback);
-//   if (challenge.username == 'admin' && challenge.password == 'secret') {
-//     callback(null, true, {
-//       user: 'admin'
-//     });
-//   } else {
-//     callback(null, false, {
-//       error: 'INVALID_PASSWORD'
-//     });
-//   }
-// });
-// app.use(login);
-
-app.use('/', routes);
+// app.use('/', routes);
 app.use('/users', users);
+
+app.get('/*', function(req, res){
+  res.sendFile(__dirname + "/public/html/index.html");
+});
+
+mongoose.connect('mongodb://localhost/demo');
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

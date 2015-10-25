@@ -17,6 +17,31 @@
 				}
 			}
 		})
+		.directive('input', function() {
+			return {
+				restrict: 'E',
+				require: 'ngModel',
+				link: function(scope, element, attrs, ngModelCtrl) {
+					if (attrs.type === 'checkbox')
+						$(element).bootstrapSwitch({
+							onText: attrs.on || 'YES',
+							offText: attrs.off || 'NO',
+							onSwitchChange: function(event, state) {
+								scope.$apply(function() {
+									ngModelCtrl.$setViewValue(state);
+								});
+							}
+						});
+
+					var dereg = scope.$watch(function() {
+						return ngModelCtrl.$modelValue;
+					}, function(newVal) {
+						$(element).bootstrapSwitch('state', !!newVal, true);
+						dereg();
+					});
+				}
+			}
+		})
 		.filter('weekFilter', function() {
 			return function(input) {
 				switch (input) {
@@ -124,6 +149,8 @@
 
 		$scope.week = 1;
 
+		$scope.currentWeek = true;
+
 		ctrl.currentEdit = {};
 
 		// $scope.appStart = momnet();
@@ -164,18 +191,16 @@
 
 		init();
 
-		$scope.$on('refreshPage', listUserInPeriod);
+		$scope.$on('refreshPage', refreshPage);
 
 		function init() {
-
 			// init duration
 			updateDuration($scope.day);
 
 			updateSortFunction();
 
-			listUserInPeriod();
+			refreshPage();
 
-			getUserTotalActivity();
 
 			$scope.$watch("day", function(newValue, oldValue) {
 				if (newValue != oldValue) {
@@ -184,14 +209,21 @@
 
 					updateSortFunction();
 
-					// listUserInPeriod();
 					$scope.$broadcast('refreshPage');
 				}
 			});
 
 			$scope.$watch("week", function(newValue) {
-				getUserTotalActivity(newValue);
+				getUserTotalActivity(newValue, $scope.currentWeek);
 			});
+			$scope.$watch('currentWeek', function(newValue) {
+				getUserTotalActivity($scope.week, newValue);
+			})
+		}
+
+		function refreshPage() {
+			listUserInPeriod();
+			getUserTotalActivity(1, $scope.currentWeek);
 		}
 
 		function showEdit(item) {
@@ -290,7 +322,7 @@
 
 
 		function removeUser(name, idx) {
-			var dlg = dialogs.confirm(undefined, "It will delete all data associated with this memeber, Are you confirm to delete ?");
+			var dlg = dialogs.confirm(undefined, "确认删除" + name + "?");
 
 			dlg.result.then(function(btn) {
 				var user = {
@@ -327,9 +359,9 @@
 			});
 		}
 
-		function getUserTotalActivity(week) {
+		function getUserTotalActivity(week, currentWeek) {
 			var week = week || 1;
-			UserService.countUserActivity(week).then(function(data) {
+			UserService.countUserActivity(week, currentWeek).then(function(data) {
 				_.map(data, function(item) {
 					ctrl.totalActivity[item._id] = item.total;
 				});
