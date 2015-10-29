@@ -171,6 +171,7 @@
 		ctrl.unsign = unsign;
 
 		ctrl.showEdit = showEdit;
+		ctrl.hideEdit = hideEdit;
 		ctrl.saveScore = saveScore;
 
 		ctrl.getCss = getCss;
@@ -226,11 +227,27 @@
 			getUserTotalActivity(1, $scope.currentWeek);
 		}
 
-		function showEdit(item) {
+		function showEdit(item, row, idx, $event) {
 			if (item._id) {
+				if (idx > 0) {
+					// not the first one
+					var list = $filter('orderBy')(row, "day").list;
+					var preItem = list[idx - 1];
+					if (item.score < preItem.score) {
+						item.score = preItem.score + 11;
+					}
+				}
 				ctrl.currentEdit.edit = false;
 				item.edit = true;
 				ctrl.currentEdit = item;
+
+			}
+		}
+
+		function hideEdit($event) {
+			var clickAttr = $event.target.attributes['ng-click'];
+			if(!clickAttr) {
+				ctrl.currentEdit.edit = false;
 			}
 		}
 

@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-controller="userController as ctrl">
+<div class="container-fluid" ng-controller="userController as ctrl" ng-click="ctrl.hideEdit($event)">
 	<div class="row">
 		<div class="col-md-4 col-sm-12 col-xs-12">
 			<calendar selected="day"></calendar>
@@ -89,7 +89,7 @@
 						<tr ng-repeat="row in ctrl.userListInPeriod | myFilter: done">
 							<td ratio="2"><span ng-bind="$index+1"></span></td>
 							<td ratio="18"><span ng-bind="row.name"></span></td>
-							<td ratio="{{45/ctrl.showDays}}" ng-repeat="item in row.list | orderBy: 'day' " ng-dblclick="ctrl.showEdit(item)" ng-click="ctrl.showEdit(item)" ng-class="ctrl.getCss(item)">
+							<td ratio="{{45/ctrl.showDays}}" ng-repeat="item in row.list | orderBy: 'day' " ng-dblclick="ctrl.showEdit(item, row, $index)" ng-click="ctrl.showEdit(item, row, $index)" ng-class="ctrl.getCss(item)">
 								<span ng-if="!item.edit">
 									<span ng-bind="item.diff"></span>/<span ng-bind="item.score"></span>
 								</span>
